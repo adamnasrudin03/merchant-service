@@ -8,8 +8,8 @@ import (
 )
 
 func SeedUsers() *[]entity.User {
-	passAdmin1, _ := HashPassword("admin1")
-	passAdmin2, _ := HashPassword("admin2")
+	passAdmin1 := HashPassword("admin1")
+	passAdmin2 := HashPassword("admin2")
 
 	Users := []entity.User{
 		{
