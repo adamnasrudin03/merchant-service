@@ -8,9 +8,10 @@ import (
 )
 
 type AppConfig struct {
-	Name string
-	Env  string
-	Port string
+	Name      string
+	Env       string
+	Port      string
+	SecretKey string
 }
 
 type DbConfig struct {
@@ -40,9 +41,10 @@ func GetInstance() *Configs {
 
 		configs = &Configs{
 			Appconfig: AppConfig{
-				Name: os.Getenv("APP_NAME"),
-				Env:  os.Getenv("APP_ENV"),
-				Port: os.Getenv("APP_PORT"),
+				Name:      os.Getenv("APP_NAME"),
+				Env:       os.Getenv("APP_ENV"),
+				Port:      os.Getenv("APP_PORT"),
+				SecretKey: os.Getenv("JWT_SECRET"),
 			},
 			Dbconfig: DbConfig{
 				Host:        os.Getenv("DB_HOST"),
