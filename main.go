@@ -5,6 +5,10 @@ import (
 	"net/http"
 
 	"github.com/adamnasrudin03/merchant-service/app/configs"
+	"github.com/adamnasrudin03/merchant-service/app/controller"
+	"github.com/adamnasrudin03/merchant-service/app/repository"
+	routers "github.com/adamnasrudin03/merchant-service/app/router"
+	"github.com/adamnasrudin03/merchant-service/app/service"
 	"github.com/adamnasrudin03/merchant-service/pkg/gormdb"
 	"github.com/adamnasrudin03/merchant-service/pkg/utils"
 	"github.com/gin-contrib/cors"
@@ -13,21 +17,26 @@ import (
 )
 
 var (
-	db *gorm.DB = gormdb.SetupDbConnection()
+	db             *gorm.DB                  = gormdb.SetupDbConnection()
+	userRepository repository.UserRepository = repository.NewUserRepository(db)
+	jwtService     service.JWTService        = service.NewJWTService()
+	authService    service.AuthService       = service.NewAuthService(userRepository)
+	authController controller.AuthController = controller.NewAuthController(authService, jwtService)
 )
 
 func main() {
 	defer gormdb.CloseDbConnection(db)
 
 	router := gin.Default()
-
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
 	router.Use(cors.Default())
 
 	router.GET("/", func(c *gin.Context) {
 		response := utils.APIResponse("Welcome my application", http.StatusOK, "success", nil)
 		c.JSON(http.StatusOK, response)
 	})
-
+	routers.AuthRouter(router, authController)
 	router.NoRoute(func(c *gin.Context) {
 		response := utils.APIResponse("Page not found", http.StatusNotFound, "error", nil)
 		c.JSON(http.StatusNotFound, response)
