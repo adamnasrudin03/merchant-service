@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/adamnasrudin03/merchant-service/app/dto"
 	"github.com/adamnasrudin03/merchant-service/app/entity"
@@ -51,7 +50,6 @@ func (repo *TransactionRepo) GetIncomeReport(queryparam dto.ParamTransaction) (r
 	}
 
 	err = query.Offset(offset).Limit(queryparam.Limit).Find(&result).Error
-	fmt.Println(query)
 	if err != nil {
 		return
 	}
