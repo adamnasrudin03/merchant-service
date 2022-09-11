@@ -1,8 +1,9 @@
 package middleware
 
 import (
-	"log"
+	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/adamnasrudin03/merchant-service/app/service"
@@ -15,12 +16,14 @@ type AuthMiddlewareController interface {
 	AuthorizeJWT()
 }
 type authMiddleware struct {
-	jwtService service.JWTService
+	jwtService  service.JWTService
+	authService service.AuthService
 }
 
-func NewAuthMiddleware(jwtService service.JWTService) *authMiddleware {
+func NewAuthMiddleware(jwtService service.JWTService, authService service.AuthService) *authMiddleware {
 	return &authMiddleware{
-		jwtService: jwtService,
+		jwtService:  jwtService,
+		authService: authService,
 	}
 }
 
@@ -54,14 +57,28 @@ func (auth *authMiddleware) AuthorizeJWT() gin.HandlerFunc {
 			return
 		}
 
-		if token.Valid {
-			claims := token.Claims.(jwt.MapClaims)
-			log.Println("Claim[user_id]: ", claims["user_id"])
-			log.Println("Claim[issuer] :", claims["issuer"])
-		} else {
-			log.Println(err)
+		playload, ok := token.Claims.(jwt.MapClaims)
+		if !ok || !token.Valid {
 			response := utils.APIResponse("token is not valid", http.StatusUnauthorized, "Unauthorized", nil)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
 		}
+
+		str := fmt.Sprintf("%v", playload["user_id"])
+		userID, err := strconv.ParseInt(str, 10, 64)
+		if err == nil {
+			fmt.Printf("%d of type %T", userID, userID)
+		}
+
+		user, err := auth.authService.GetUserByID(userID)
+		if err != nil {
+			response := utils.APIResponse("please check again if the username and password are registered", http.StatusUnauthorized, "Unauthorized", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		//set context isinya user
+		c.Set("currentUser", user)
+
 	}
 }

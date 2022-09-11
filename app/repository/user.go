@@ -8,6 +8,7 @@ import (
 //UserRepository is contract what userRepository can do to db
 type UserRepository interface {
 	VerifyCredential(email string, password string) interface{}
+	GetByID(ID int64) (user entity.User, err error)
 }
 
 type userRepo struct {
@@ -28,4 +29,13 @@ func (repo *userRepo) VerifyCredential(username string, password string) interfa
 		return user
 	}
 	return nil
+}
+
+func (repo *userRepo) GetByID(ID int64) (user entity.User, err error) {
+	err = repo.DB.Where("id = ?", ID).Find(&user).Error
+	if err == nil {
+		return
+	}
+
+	return
 }

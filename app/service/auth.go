@@ -11,6 +11,7 @@ import (
 //AuthService is a contract about something that this service can do
 type AuthService interface {
 	VerifyCredential(username string, password string) interface{}
+	GetUserByID(ID int64) (user entity.User, err error)
 }
 
 type authService struct {
@@ -44,4 +45,13 @@ func (service *authService) VerifyCredential(username string, password string) i
 		return false
 	}
 	return false
+}
+
+func (service *authService) GetUserByID(ID int64) (user entity.User, err error) {
+	user, err = service.userRepository.GetByID(ID)
+	if err != nil {
+		return
+	}
+
+	return
 }
