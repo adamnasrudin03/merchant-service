@@ -142,7 +142,7 @@ Response:
 ```
 
 
-- [2] - List transaction by outlet id
+- [3] - List transaction by outlet id
 - [GET] : {root.api}/api/v1/transaction/outlet/:id_outlet
 
 ```json
