@@ -1,0 +1,164 @@
+{
+	"info": {
+		"_postman_id": "cc99cf7b-27c1-430a-a8f5-1548020adf7c",
+		"name": "merchant service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "10619265"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"admin1\",\r\n    \"password\": \"admin1\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{hostname}}/api/v1/auth/login",
+					"host": [
+						"{{hostname}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List Transaction By Merchant ID",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{hostname}}/api/v1/transaction/merchant/1?page=1&limit=10&start_at=2021-11-01&end_at=2021-11-30",
+					"host": [
+						"{{hostname}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"transaction",
+						"merchant",
+						"1"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "limit",
+							"value": "10"
+						},
+						{
+							"key": "start_at",
+							"value": "2021-11-01"
+						},
+						{
+							"key": "end_at",
+							"value": "2021-11-30"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List Transaction By Outlet ID",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{hostname}}/api/v1/transaction/outlet/3?page=1&limit=10&start_at=2021-11-01&end_at=2021-11-30",
+					"host": [
+						"{{hostname}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"transaction",
+						"outlet",
+						"3"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "limit",
+							"value": "10"
+						},
+						{
+							"key": "start_at",
+							"value": "2021-11-01"
+						},
+						{
+							"key": "end_at",
+							"value": "2021-11-30"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "hostname",
+			"value": "http://127.0.0.1:8000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMSIsImV4cCI6MTY5NDQwNjUyNywiaWF0IjoxNjYyODcwNTI3LCJpc3MiOiJhZGFtbmFzcnVkaW4ifQ.P1xF9LeiiKPyh8QCsMILrIzikF1Zenzd2aPidnfGiO4",
+			"type": "string"
+		}
+	]
+}
