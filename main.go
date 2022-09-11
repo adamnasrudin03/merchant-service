@@ -33,7 +33,7 @@ var (
 func main() {
 	defer gormdb.CloseDbConnection(db)
 
-	authMiddleware := middleware.NewAuthMiddleware(jwtService)
+	authMiddleware := middleware.NewAuthMiddleware(jwtService, authService)
 
 	router := gin.Default()
 	router.Use(gin.Logger())
