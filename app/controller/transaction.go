@@ -14,7 +14,7 @@ import (
 
 //TransactionController interface is a contract what this controller can do
 type TransactionController interface {
-	ListTransactionReportByMerchantID(ctx *gin.Context)
+	ListTransactionReport(ctx *gin.Context)
 }
 
 type transactionController struct {
@@ -30,21 +30,35 @@ func NewTransactionController(srv *service.Services, jwtService service.JWTServi
 	}
 }
 
-func (c *transactionController) ListTransactionReportByMerchantID(ctx *gin.Context) {
+func (c *transactionController) ListTransactionReport(ctx *gin.Context) {
 	var (
 		paramPage  int = 0
 		paramLimit int = 10
+		isMerchant     = false
 	)
 
-	if ctx.Param("merchantID") == "" {
-		response := utils.APIResponse("param ID Merchant not found", http.StatusBadRequest, "error", nil)
+	paramID := ctx.Param("id")
+
+	switch ctx.Param("param") {
+	case "merchant":
+		isMerchant = true
+	case "outlet":
+		isMerchant = false
+	default:
+		response := utils.APIResponse("page not found", http.StatusNotFound, "error", nil)
+		ctx.JSON(http.StatusNotFound, response)
+		return
+	}
+
+	if paramID == "" {
+		response := utils.APIResponse("param ID not found", http.StatusBadRequest, "error", nil)
 		ctx.JSON(http.StatusBadRequest, response)
 		return
 	}
 
-	merchantID, err := strconv.Atoi(ctx.Param("merchantID"))
+	ID, err := strconv.Atoi(paramID)
 	if err != nil {
-		response := utils.APIResponse("param ID Merchant not valid", http.StatusBadRequest, "error", nil)
+		response := utils.APIResponse("param ID not valid", http.StatusBadRequest, "error", nil)
 		ctx.JSON(http.StatusBadRequest, response)
 		return
 	}
@@ -80,19 +94,29 @@ func (c *transactionController) ListTransactionReportByMerchantID(ctx *gin.Conte
 
 	currentUser := ctx.MustGet("currentUser").(entity.User)
 
-	merchant, _ := c.Service.Merchant.GetMerchantByID(int64(merchantID))
-	if merchant.UserID != currentUser.ID {
-		response := utils.APIResponse("Access to that resource is forbidden", http.StatusForbidden, "error", nil)
-		ctx.JSON(http.StatusForbidden, response)
-		return
+	param := dto.ParamTransaction{
+		Page:    paramPage,
+		Limit:   paramLimit,
+		StartAt: startAt,
+		EndAt:   endAt,
 	}
 
-	param := dto.ParamTransaction{
-		Page:       paramPage,
-		Limit:      paramLimit,
-		MerchantID: merchantID,
-		StartAt:    startAt,
-		EndAt:      endAt,
+	if isMerchant {
+		param.MerchantID = ID
+		merchant, _ := c.Service.Merchant.GetMerchantByID(int64(ID))
+		if merchant.UserID != currentUser.ID {
+			response := utils.APIResponse("Access to that resource is forbidden", http.StatusForbidden, "error", nil)
+			ctx.JSON(http.StatusForbidden, response)
+			return
+		}
+	} else {
+		param.OutletID = ID
+		outlet, _ := c.Service.Outlet.GetOutletByID(int64(ID))
+		if outlet.UserID != currentUser.ID {
+			response := utils.APIResponse("Access to that resource is forbidden", http.StatusForbidden, "error", nil)
+			ctx.JSON(http.StatusForbidden, response)
+			return
+		}
 	}
 
 	transactions, err := c.Service.Transaction.GetIncomeReport(param)

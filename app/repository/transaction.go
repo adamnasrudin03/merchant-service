@@ -38,9 +38,17 @@ func (repo *TransactionRepo) GetIncomeReport(queryparam dto.ParamTransaction) (r
 			"date(transactions.created_at) as transaction_date",
 		).
 		Joins("join merchants m on m.id = transactions.merchant_id").
-		Joins("join outlets o on o.id = transactions.outlet_id").
-		Where("transactions.merchant_id = ? ", queryparam.MerchantID).
-		Where("date(transactions.created_at) BETWEEN ? AND ?", queryparam.StartAt, queryparam.EndAt).
+		Joins("join outlets o on o.id = transactions.outlet_id")
+
+	if queryparam.MerchantID != 0 {
+		query = query.Where("transactions.merchant_id = ? ", queryparam.MerchantID)
+	}
+
+	if queryparam.OutletID != 0 {
+		query = query.Where("transactions.outlet_id = ? ", queryparam.OutletID)
+	}
+
+	query = query.Where("date(transactions.created_at) BETWEEN ? AND ?", queryparam.StartAt, queryparam.EndAt).
 		Group("date(transactions.created_at)").
 		Order("transactions.created_at asc")
 
