@@ -17,15 +17,15 @@ type TransactionController interface {
 }
 
 type transactionController struct {
-	TransactionService service.TransactionService
-	jwtService         service.JWTService
+	Service    *service.Services
+	jwtService service.JWTService
 }
 
 //NewTransactionController creates a new instance of TransactionController
-func NewTransactionController(TransactionService service.TransactionService, jwtService service.JWTService) TransactionController {
+func NewTransactionController(srv *service.Services, jwtService service.JWTService) TransactionController {
 	return &transactionController{
-		TransactionService: TransactionService,
-		jwtService:         jwtService,
+		Service:    srv,
+		jwtService: jwtService,
 	}
 }
 
@@ -85,7 +85,7 @@ func (c *transactionController) ListTransactionReport(ctx *gin.Context) {
 		EndAt:      endAt,
 	}
 
-	transactions, err := c.TransactionService.GetIncomeReport(param)
+	transactions, err := c.Service.Transaction.GetIncomeReport(param)
 	if err != nil {
 		response := utils.APIResponse("Error to get transaction", http.StatusBadRequest, "error", nil)
 		ctx.JSON(http.StatusBadRequest, response)

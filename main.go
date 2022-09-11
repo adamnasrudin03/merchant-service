@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/adamnasrudin03/merchant-service/app"
 	"github.com/adamnasrudin03/merchant-service/app/configs"
 	"github.com/adamnasrudin03/merchant-service/app/controller"
 	"github.com/adamnasrudin03/merchant-service/app/middleware"
-	"github.com/adamnasrudin03/merchant-service/app/repository"
 	routers "github.com/adamnasrudin03/merchant-service/app/router"
 	"github.com/adamnasrudin03/merchant-service/app/service"
 	"github.com/adamnasrudin03/merchant-service/pkg/gormdb"
@@ -18,22 +18,18 @@ import (
 )
 
 var (
-	db                    *gorm.DB                         = gormdb.SetupDbConnection()
-	userRepository        repository.UserRepository        = repository.NewUserRepository(db)
-	transactionRepository repository.TransactionRepository = repository.NewTransactionRepository(db)
+	db         *gorm.DB           = gormdb.SetupDbConnection()
+	repo                          = app.WiringRepository(db)
+	services                      = app.WiringService(repo)
+	jwtService service.JWTService = service.NewJWTService()
 
-	jwtService         service.JWTService         = service.NewJWTService()
-	authService        service.AuthService        = service.NewAuthService(userRepository)
-	transactionService service.TransactionService = service.NewTransactionService(transactionRepository)
-
-	transactionController controller.TransactionController = controller.NewTransactionController(transactionService, jwtService)
-	authController        controller.AuthController        = controller.NewAuthController(authService, jwtService)
+	transactionController controller.TransactionController = controller.NewTransactionController(services, jwtService)
+	authController        controller.AuthController        = controller.NewAuthController(services.Auth, jwtService)
+	authMiddleware                                         = middleware.NewAuthMiddleware(jwtService, services.Auth)
 )
 
 func main() {
 	defer gormdb.CloseDbConnection(db)
-
-	authMiddleware := middleware.NewAuthMiddleware(jwtService, authService)
 
 	router := gin.Default()
 	router.Use(gin.Logger())
