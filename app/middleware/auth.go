@@ -11,8 +11,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type AuthMiddlewareController interface {
+	AuthorizeJWT()
+}
+type authMiddleware struct {
+	jwtService service.JWTService
+}
+
+func NewAuthMiddleware(jwtService service.JWTService) *authMiddleware {
+	return &authMiddleware{
+		jwtService: jwtService,
+	}
+}
+
 //AuthorizeJWT validates the token user given, return 401 if not valid
-func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc {
+func (auth *authMiddleware) AuthorizeJWT() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 
@@ -28,9 +41,15 @@ func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc {
 			tokenString = arrayToken[1]
 		}
 
-		token, err := jwtService.ValidateToken(tokenString)
-		if err != nil {
+		if tokenString == "" {
 			response := utils.APIResponse("no token found", http.StatusUnauthorized, "Unauthorized", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		token, err := auth.jwtService.ValidateToken(tokenString)
+		if err != nil {
+			response := utils.APIResponse("invalid token", http.StatusUnauthorized, "Unauthorized", nil)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
 			return
 		}

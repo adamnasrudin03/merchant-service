@@ -6,6 +6,7 @@ import (
 
 	"github.com/adamnasrudin03/merchant-service/app/configs"
 	"github.com/adamnasrudin03/merchant-service/app/controller"
+	"github.com/adamnasrudin03/merchant-service/app/middleware"
 	"github.com/adamnasrudin03/merchant-service/app/repository"
 	routers "github.com/adamnasrudin03/merchant-service/app/router"
 	"github.com/adamnasrudin03/merchant-service/app/service"
@@ -32,6 +33,8 @@ var (
 func main() {
 	defer gormdb.CloseDbConnection(db)
 
+	authMiddleware := middleware.NewAuthMiddleware(jwtService)
+
 	router := gin.Default()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
@@ -43,6 +46,7 @@ func main() {
 	})
 
 	routers.AuthRouter(router, authController)
+	router.Use(authMiddleware.AuthorizeJWT())
 	routers.TransactionRouter(router, transactionController)
 
 	router.NoRoute(func(c *gin.Context) {
