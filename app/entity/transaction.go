@@ -12,3 +12,16 @@ type Transaction struct {
 	UpdatedAt  time.Time `gorm:"type:DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" json:"updated_at"`
 	UpdatedBy  int64     `gorm:"type:bigint(20);NOT NULL" json:"updated_by"`
 }
+
+type TransactionRes struct {
+	MerchantID      int64   `json:"merchant_id"`
+	MerchantName    string  `json:"merchant_name"`
+	OutletID        int64   `json:"outlet_id"`
+	OutletName      string  `json:"outlet_name"`
+	OmsetTotal      float64 `json:"omset_total"`
+	TransactionDate string  `json:"transaction_date"`
+}
+
+func (TransactionRes) TableName() string {
+	return "transactions"
+}

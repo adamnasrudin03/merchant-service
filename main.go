@@ -17,11 +17,16 @@ import (
 )
 
 var (
-	db             *gorm.DB                  = gormdb.SetupDbConnection()
-	userRepository repository.UserRepository = repository.NewUserRepository(db)
-	jwtService     service.JWTService        = service.NewJWTService()
-	authService    service.AuthService       = service.NewAuthService(userRepository)
-	authController controller.AuthController = controller.NewAuthController(authService, jwtService)
+	db                    *gorm.DB                         = gormdb.SetupDbConnection()
+	userRepository        repository.UserRepository        = repository.NewUserRepository(db)
+	transactionRepository repository.TransactionRepository = repository.NewTransactionRepository(db)
+
+	jwtService         service.JWTService         = service.NewJWTService()
+	authService        service.AuthService        = service.NewAuthService(userRepository)
+	transactionService service.TransactionService = service.NewTransactionService(transactionRepository)
+
+	transactionController controller.TransactionController = controller.NewTransactionController(transactionService, jwtService)
+	authController        controller.AuthController        = controller.NewAuthController(authService, jwtService)
 )
 
 func main() {
@@ -36,7 +41,10 @@ func main() {
 		response := utils.APIResponse("Welcome my application", http.StatusOK, "success", nil)
 		c.JSON(http.StatusOK, response)
 	})
+
 	routers.AuthRouter(router, authController)
+	routers.TransactionRouter(router, transactionController)
+
 	router.NoRoute(func(c *gin.Context) {
 		response := utils.APIResponse("Page not found", http.StatusNotFound, "error", nil)
 		c.JSON(http.StatusNotFound, response)
