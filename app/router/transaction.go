@@ -8,6 +8,6 @@ import (
 func TransactionRouter(e *gin.Engine, transactionController controller.TransactionController) {
 	transactionRoutes := e.Group("/api/v1/transaction")
 	{
-		transactionRoutes.GET("/:merchantID", transactionController.ListTransactionReport)
+		transactionRoutes.GET("/merchant/:merchantID", transactionController.ListTransactionReportByMerchantID)
 	}
 }
