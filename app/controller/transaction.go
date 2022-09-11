@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/adamnasrudin03/merchant-service/app/dto"
+	"github.com/adamnasrudin03/merchant-service/app/entity"
 	"github.com/adamnasrudin03/merchant-service/app/service"
 	"github.com/adamnasrudin03/merchant-service/pkg/utils"
 	"github.com/gin-gonic/gin"
@@ -13,7 +14,7 @@ import (
 
 //TransactionController interface is a contract what this controller can do
 type TransactionController interface {
-	ListTransactionReport(ctx *gin.Context)
+	ListTransactionReportByMerchantID(ctx *gin.Context)
 }
 
 type transactionController struct {
@@ -29,7 +30,7 @@ func NewTransactionController(srv *service.Services, jwtService service.JWTServi
 	}
 }
 
-func (c *transactionController) ListTransactionReport(ctx *gin.Context) {
+func (c *transactionController) ListTransactionReportByMerchantID(ctx *gin.Context) {
 	var (
 		paramPage  int = 0
 		paramLimit int = 10
@@ -74,6 +75,15 @@ func (c *transactionController) ListTransactionReport(ctx *gin.Context) {
 	if err != nil {
 		response := utils.APIResponse("query param end_at not found or invalid", http.StatusBadRequest, "error", nil)
 		ctx.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	currentUser := ctx.MustGet("currentUser").(entity.User)
+
+	merchant, _ := c.Service.Merchant.GetMerchantByID(int64(merchantID))
+	if merchant.UserID != currentUser.ID {
+		response := utils.APIResponse("Access to that resource is forbidden", http.StatusForbidden, "error", nil)
+		ctx.JSON(http.StatusForbidden, response)
 		return
 	}
 
