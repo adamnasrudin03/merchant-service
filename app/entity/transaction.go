@@ -14,12 +14,12 @@ type Transaction struct {
 }
 
 type TransactionRes struct {
-	MerchantID      int64   `json:"merchant_id"`
-	MerchantName    string  `json:"merchant_name"`
-	OutletID        int64   `json:"outlet_id"`
-	OutletName      string  `json:"outlet_name"`
-	OmsetTotal      float64 `json:"omset_total"`
-	TransactionDate string  `json:"transaction_date"`
+	MerchantID      int64     `json:"merchant_id"`
+	MerchantName    string    `json:"merchant_name"`
+	OutletID        int64     `json:"outlet_id"`
+	OutletName      string    `json:"outlet_name"`
+	OmsetTotal      float64   `json:"omset_total"`
+	TransactionDate time.Time `json:"transaction_date"`
 }
 
 func (TransactionRes) TableName() string {
